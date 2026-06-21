@@ -21,15 +21,15 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
-  // Projected 3D coordinates map to 2D screen positions.
-  // Using true isometric transformation:
+  // 投影三维坐标映身到二维屏幕位置：
+  // 采用标准等轴测视角变换（Isometric Transformation）：
   // screenX = (x - y) * cos(30)
   // screenY = (x + y) * sin(30) - z
   const cos30 = 0.8660254;
   const sin30 = 0.5;
 
   const project = (x: number, y: number, z: number) => {
-    // Canvas center offsets
+    // 画布中央虚拟偏移量
     const cX = 380;
     const cY = 280;
     const screenX = cX + (x - y) * cos30;
@@ -50,7 +50,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).tagName === 'path' || (e.target as HTMLElement).tagName === 'polygon' || (e.target as HTMLElement).tagName === 'ellipse') {
-      // Allow clicking shapes to bubble through without causing drag trigger
+      // 允许点击具体矢量形状时直接触发事件，而不打断框体拖拽初始化
     }
     setIsDragging(true);
     setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
@@ -83,7 +83,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
     setPan({ x: 0, y: 0 });
   };
 
-  // Poly generator for isometric box
+  // 用于在等轴测空间绘制立方体 (Box) 的高阶多边形生成器
   const renderBox = (
     id: string,
     x: number,
@@ -109,7 +109,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
     const zMin = z;
     const zMax = z + dz;
 
-    // Projected vertices
+    // 投影立方体的 8 个对应顶点
     const vT1 = project(xMin, yMin, zMax);
     const vT2 = project(xMax, yMin, zMax);
     const vT3 = project(xMax, yMax, zMax);
@@ -131,9 +131,9 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
       
     const strokeWidth = isSelected ? 2.5 : isHovered ? 1.5 : 1;
 
-    // Shading modifiers
+    // 侧面阴影明暗器设置
     const topColor = customStyles?.topFill || `rgba(30, 41, 59, 0.85)`;
-    const leftColor = customStyles?.leftFill || `rgba(15, 23, 42, 0.9)`;
+    const leftColor = customStyles?.leftFill || `rgba(15, 23, 42, 0.95)`;
     const rightColor = customStyles?.rightFill || `rgba(2, 6, 23, 0.95)`;
 
     return (
@@ -145,7 +145,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
         onClick={(e) => { e.stopPropagation(); onSelectModule(id); }}
         style={{ filter: isHovered || isSelected ? `url(#glow-${id})` : 'none' }}
       >
-        {/* Glow filter definitions localized */}
+        {/* 动态生成的高亮发光滤镜声明 */}
         <defs>
           <filter id={`glow-${id}`} x="-30%" y="-30%" width="160%" height="160%">
             <feGaussianBlur stdDeviation={isSelected ? "8" : "4"} result="blur" />
@@ -156,7 +156,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           </filter>
         </defs>
 
-        {/* Right Face */}
+        {/* 右侧面 (Right Face) */}
         <polygon 
           points={ptString([vT2, vT3, vB2, project(xMax, yMin, zMin)])} 
           fill={rightColor}
@@ -165,7 +165,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           className="transition-all duration-300"
         />
 
-        {/* Left Face */}
+        {/* 左侧面 (Left Face) */}
         <polygon 
           points={ptString([vT3, vT4, vB1, vB2])} 
           fill={leftColor}
@@ -174,7 +174,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           className="transition-all duration-300"
         />
 
-        {/* Top Face */}
+        {/* 顶面 (Top Face) */}
         <polygon 
           points={ptString([vT1, vT2, vT3, vT4])} 
           fill={topColor}
@@ -183,10 +183,10 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           className="transition-all duration-300"
         />
 
-        {/* Dynamic circuit textures on chip top */}
+        {/* 芯片顶层动态集成电路走线纹理装饰 */}
         {customStyles?.showCircuitPattern && (
           <g opacity={isHovered || isSelected ? 0.8 : 0.4} className="pointer-events-none">
-            {/* Core processor inner square */}
+            {/* 核心处理器中央裸晶内正方形 */}
             <polygon 
               points={ptString([
                 project(x - dx*0.3, y - dy*0.3, zMax + 0.5),
@@ -198,7 +198,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
               stroke={isSelected ? primaryAccent : themeColor}
               strokeWidth={1}
             />
-            {/* Internal design circuits - gold paths */}
+            {/* 内部设计走的金黄色交互性铜线排布线 */}
             <polyline
               points={ptString([
                 project(x - dx*0.4, y - dy*0.1, zMax + 0.8),
@@ -219,7 +219,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
               stroke={themeColor}
               strokeWidth={1.5}
             />
-            {/* Multi-die heatspreader lines */}
+            {/* 多核晶片导热分布虚线 */}
             <line 
               x1={project(x - dx*0.2, y - dy*0.2, zMax + 0.8).x} 
               y1={project(x - dx*0.2, y - dy*0.2, zMax + 0.8).y}
@@ -235,7 +235,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
     );
   };
 
-  // Render vertical cylinder (e.g. lens barrel or sensor transducer)
+  // 渲染垂直圆柱体 (例如镜头镜筒或声呐探头换能器)
   const renderCylinder = (
     id: string,
     x: number,
@@ -252,7 +252,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
     const basePts: { x: number; y: number }[] = [];
     const topPts: { x: number; y: number }[] = [];
 
-    // Project points for the top and bottom circles
+    // 计算并在等轴测空间内映射顶面、底面的圆周点集
     for (let i = 0; i <= steps; i++) {
       const angle = (i * 2 * Math.PI) / steps;
       const dx = r * Math.cos(angle);
@@ -264,8 +264,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
     const strokeColor = isSelected ? primaryAccent : isHovered ? themeColor : 'rgba(71, 85, 105, 0.4)';
     const strokeWidth = isSelected ? 2 : isHovered ? 1.5 : 1;
 
-    // Generate indices for the silhouette sides (typically extreme projected points)
-    // In isometric projection, left and right bounds are reached around 150deg and -30deg
+    // 定位等轴测圆柱体侧壁投影的左、右极值顶点位置
     let leftIdx = 0;
     let rightIdx = 0;
     let minProjX = Infinity;
@@ -301,7 +300,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
         onMouseLeave={() => onHoverModule(null)}
         onClick={(e) => { e.stopPropagation(); onSelectModule(id); }}
       >
-        {/* Cylinder Body Wall */}
+        {/* 圆柱体侧壁外轮廓 */}
         <polygon
           points={ptString(sidePolygonPts)}
           fill={customFill || 'rgba(15, 23, 42, 0.92)'}
@@ -309,7 +308,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           strokeWidth={strokeWidth}
         />
 
-        {/* Segment shading helper lines */}
+        {/* 等间距投影阴影辅助渐变线 */}
         {[0.25, 0.5, 0.75].map((ratio, idx) => {
           const midX = x + r * Math.cos(ratio * Math.PI - Math.PI/4);
           const midY = y + r * Math.sin(ratio * Math.PI - Math.PI/4);
@@ -329,7 +328,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           );
         })}
 
-        {/* Top Ellipse Overlaid */}
+        {/* 覆盖在上层的顶盖圆盘 */}
         <polygon
           points={ptString(topPts)}
           fill="rgba(30, 41, 59, 1)"
@@ -337,11 +336,11 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           strokeWidth={strokeWidth}
         />
 
-        {/* Aperture inner reflection (for lens) */}
+        {/* 光学镜片内侧反射偏振（用于相机镜头折射效果渲染） */}
         {r > 10 && (
           <polygon
             points={ptString(topPts.map((p) => {
-              // Scale down slightly for inside ring
+              // 适当向核心比例收紧以生成内圈
               const dx = (p.x - project(x, y, zMax).x) * 0.7;
               const dy = (p.y - project(x, y, zMax).y) * 0.7;
               return { x: project(x, y, zMax).x + dx, y: project(x, y, zMax).y + dy };
@@ -356,21 +355,20 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
     );
   };
 
-  // Dynamic traces (Manhattan routed)
+  // 动态总线铜线信号渲染 (曼哈顿直角布线 Manhattan Routing)
   const renderTrace = (
     source: { x: number; y: number; z: number },
     target: { x: number; y: number; z: number },
     color: string,
     isPulsing: boolean
   ) => {
-    // Standard Manhattan trace routing:
-    // P1 -> X-route -> Mid1 -> Y-route -> Target
+    // 标准曼哈顿直角折线路由算法 (X走线 -> 拐角 -> Y走线 -> 垂直高度对齐 Z)
     const p1 = project(source.x, source.y, source.z);
     
-    // Middle point after solving X
+    // 对齐 X 轴的中间拐点
     const pMid = project(target.x, source.y, source.z);
     
-    // Middle point after solving Y (and z height adjustments)
+    // 对齐 Y 轴的中间拐点 (加端点高度对齐)
     const pMid2 = project(target.x, target.y, source.z);
 
     const pTarget = project(target.x, target.y, target.z);
@@ -379,7 +377,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
 
     return (
       <g className="pointer-events-none">
-        {/* Backplane background trace path */}
+        {/* PCB 底板的暗色凹槽信号轨 */}
         <path
           d={pathD}
           fill="none"
@@ -388,7 +386,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-        {/* Core copper neon guide trace line */}
+        {/* 核心高速发光铜线网络 */}
         <path
           d={pathD}
           fill="none"
@@ -402,7 +400,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
             filter: isPulsing ? 'drop-shadow(0 0 4px ' + color + ')' : 'none'
           }}
         />
-        {/* Infinite flow of packets */}
+        {/* 数据包无限周期流动虚线特效 */}
         <path
           d={pathD}
           fill="none"
@@ -435,7 +433,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
       onWheel={handleWheel}
       id="poster-diagram-stage"
     >
-      {/* Blueprint Grid Layers */}
+      {/* 蓝图背景网格层 */}
       {state.isGridVisible && (
         <div 
           className="absolute inset-0 opacity-[0.06] pointer-events-none transition-opacity duration-300"
@@ -450,15 +448,15 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
         />
       )}
 
-      {/* Cyberpunk Scanlines */}
+      {/* 赛博朋克扫描线 */}
       {state.isScanlineVisible && (
         <div className="absolute inset-0 bg-scanlines pointer-events-none opacity-[0.035] mix-blend-overlay z-10" />
       )}
 
-      {/* Embedded Ambient Glowing Filters */}
+      {/* 暗黑边缘晕影环境遮罩 */}
       <div className="absolute inset-0 bg-radial-vignette pointer-events-none z-10" />
 
-      {/* SVG Container wrapping the projected structure */}
+      {/* 承载等轴测模型的根 SVG 容器 */}
       <svg
         className="w-full h-full"
         style={{
@@ -469,7 +467,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
         onClick={() => onSelectModule('')}
       >
         <defs>
-          {/* Glowing gradients */}
+          {/* 发光材质和渐变色定义 */}
           <radialGradient id="lensGloss" cx="30%" cy="30%" r="70%">
             <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.8" />
             <stop offset="50%" stopColor="#ec4899" stopOpacity="0.4" />
@@ -494,7 +492,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           </linearGradient>
         </defs>
 
-        {/* 1. CENTRAL BLUEPRINT BACKPLANE (Drawn first as floor layer) */}
+        {/* 1. 中央核心主板底板层 (蓝图样图最先渲染作为地板层) */}
         <polygon
           points={`${project(-280, -280, -8).x},${project(-280, -280, -8).y} 
                    ${project(280, -280, -8).x},${project(280, -280, -8).y} 
@@ -506,7 +504,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           pointerEvents="none"
         />
 
-        {/* floor axis rulers coordinates */}
+        {/* 零地平面对称辅助轴线坐标系 */}
         <line
           x1={project(-280, 0, -8).x} y1={project(-280, 0, -8).y}
           x2={project(280, 0, -8).x} y2={project(280, 0, -8).y}
@@ -524,8 +522,8 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           pointerEvents="none"
         />
 
-        {/* 2. COPPER SIGNAL TRACE CONNECTORS */}
-        {/* DCMI: OV5640 Cam -> STM32H7 (Runs in pink/magenta theme) */}
+        {/* 2. 在线路板上渲染曼哈顿总线铜线信号轨迹 */}
+        {/* DCMI: OV5640 摄像头传感器 -> STM32H7 (粉红/霓虹紫配色传输线) */}
         {renderTrace(
           { x: -210, y: -60, z: 2 },
           { x: -60, y: -20, z: 2 },
@@ -533,7 +531,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           state.simulatingSignals.camera || activeModuleId === 'ov5640'
         )}
 
-        {/* LTDC: STM32H7 -> TFT-LCD (Runs in yellow code) */}
+        {/* LTDC Display Interface: STM32H7 主控 -> TFT 液晶面板 (金黄配色总线) */}
         {renderTrace(
           { x: -20, y: 60, z: 2 },
           { x: -60, y: 210, z: 2 },
@@ -541,7 +539,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           state.simulatingSignals.lcd || activeModuleId === 'lcd'
         )}
 
-        {/* GPIO/Timer: SRF-Ultrasonic -> STM32H7 (Runs in violet code) */}
+        {/* GPIO Trigger & Timer Capture: 超声波声呐 -> STM32H7 (紫色配合走线) */}
         {renderTrace(
           { x: 210, y: 80, z: 2 },
           { x: 60, y: 30, z: 2 },
@@ -549,7 +547,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           state.simulatingSignals.ultrasonic || activeModuleId === 'ultrasonic'
         )}
 
-        {/* SDIO Bus: ESP-WiFi -> STM32H7 (Runs in emerald code) */}
+        {/* SDIO Bus: ESP-WiFi 模块 -> STM32H7 主控 (翠绿色走线组) */}
         {renderTrace(
           { x: 20, y: -210, z: 2 },
           { x: 20, y: -60, z: 2 },
@@ -557,7 +555,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           state.simulatingSignals.wifi || activeModuleId === 'wifi'
         )}
 
-        {/* RF Link WiFi -> Cloud Cloud (Air gap transmission) */}
+        {/* 射频天线信号：WiFi 模块 -> 远程物联网云 (空间气隙射频链路) */}
         {renderTrace(
           { x: 60, y: -240, z: 24 },
           { x: 300, y: -260, z: 120 },
@@ -566,9 +564,9 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
         )}
 
 
-        {/* 3. PHYSICAL SYSTEM NODES RENDERING (In z-depth order: far-to-near) */}
+        {/* 3. 渲染物理硬件元件三维网格节点 (由远及近 Z-Buffer 遮挡排序) */}
 
-        {/* === wifi module === (Top, y < 0) */}
+        {/* === WiFi 核心模块 === */}
         {renderBox(
           'wifi',
           60, -240, 0,
@@ -578,7 +576,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           activeModuleId === 'wifi',
           { topFill: 'rgba(12, 74, 110, 0.45)', leftFill: 'rgba(8, 47, 73, 0.65)', rightFill: 'rgba(2, 44, 34, 0.85)' }
         )}
-        {/* Metal shield can on ESP Wifi */}
+        {/* 金属屏蔽罩屏蔽金属罩外饰 */}
         {renderBox(
           'wifi',
           56, -244, 4,
@@ -588,7 +586,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           activeModuleId === 'wifi',
           { topFill: 'rgba(71, 85, 105, 0.95)', leftFill: 'rgba(51, 65, 85, 0.98)', rightFill: 'rgba(30, 41, 59, 1.0)' }
         )}
-        {/* Antenna loop strip */}
+        {/* 板载 PCB 黄金微带天线微缩走线 */}
         <path
           d={`M ${project(44, -225, 4.2).x} ${project(44, -225, 4.2).y} 
               L ${project(76, -225, 4.2).x} ${project(76, -225, 4.2).y}
@@ -600,7 +598,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           stroke="#eab308"
           strokeWidth={1.5}
         />
-        {/* Wireless Wifi Beacon Ripples when transferring */}
+        {/* WiFi 无线帧数据封包信号传递波动涟漪特效 */}
         {(state.simulatingSignals.wifi || activeModuleId === 'wifi') && (
           <g opacity={0.8} className="pointer-events-none">
             <path
@@ -626,8 +624,8 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
         )}
 
 
-        {/* === CLOUD SERVERS === (Back Right Elevated) */}
-        {/* octonary database platform base */}
+        {/* === 远程云端物联网服务器 ===  */}
+        {/* 浮空高架服务器基底托盘 */}
         <polygon
           points={`${project(270, -320, 110).x},${project(270, -320, 110).y}
                    ${project(370, -320, 110).x},${project(370, -320, 110).y}
@@ -639,7 +637,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           onClick={(e) => { e.stopPropagation(); onSelectModule('cloud'); }}
           className="cursor-pointer"
         />
-        {/* Cloud Connection Server Stack (3 Units) */}
+        {/* 云端数据流集中架式机柜容器（三层刀片服务器结构） */}
         {renderBox(
           'cloud',
           320, -270, 112,
@@ -658,9 +656,9 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           activeModuleId === 'cloud',
           { topFill: 'rgba(30, 41, 59, 0.92)', leftFill: 'rgba(15, 23, 42, 0.96)', rightFill: 'rgba(2, 6, 23, 1)' }
         )}
-        {/* Server vent slots and blinking storage registers */}
+        {/* 柜体侧面通风缝和频闪的云主机信号指示灯 */}
         <g opacity={0.9} pointerEvents="none">
-          {/* LED dots on rack servers */}
+          {/* 各机架硬件运行状态 LED 反馈亮点 */}
           <circle cx={project(300, -250, 126).x} cy={project(300, -250, 126).y} r={1.5} fill="#10b981" />
           <circle cx={project(310, -250, 126).x} cy={project(310, -250, 126).y} r={1.5} fill={state.simulatingSignals.cloud ? "#f97316" : "#3b82f6"} />
           <circle cx={project(320, -250, 126).x} cy={project(320, -250, 126).y} r={1.5} fill={state.simulatingSignals.cloud ? "#f43f5e" : "#1e293b"} />
@@ -669,7 +667,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           <circle cx={project(310, -250, 150).x} cy={project(310, -250, 150).y} r={1.5} fill={state.simulatingSignals.cloud ? "#f97316" : "#475569"} />
           <circle cx={project(320, -250, 150).x} cy={project(320, -250, 150).y} r={1.5} fill="#3b82f6" />
         </g>
-        {/* Floating AI neural database cloud rings */}
+        {/* 云端计算核心脑机人工智能神经网络浮动环绕圈 */}
         {(state.simulatingSignals.cloud || activeModuleId === 'cloud') && (
           <g opacity={0.65} className="pointer-events-none">
             <ellipse 
@@ -694,8 +692,8 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
         )}
 
 
-        {/* === CENTRAL MICROCONTROLLER BASE BOARD === */}
-        {/* Big dark system board footprint */}
+        {/* === 中央 STM32H7 核心微控制器主板 === */}
+        {/* 大型深邃微电子覆铜 PCB 节点板底座 */}
         <polygon
           points={`${project(-130, -130, -2).x},${project(-130, -130, -2).y} 
                    ${project(130, -130, -2).x},${project(130, -130, -2).y} 
@@ -708,7 +706,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           className="cursor-pointer"
         />
 
-        {/* Golden guard framing PCB line */}
+        {/* 环绕电路底板的金色电源防护安全切线纹理 */}
         <polygon
           points={`${project(-124, -124, -0.5).x},${project(-124, -124, -0.5).y} 
                    ${project(124, -124, -0.5).x},${project(124, -124, -0.5).y} 
@@ -720,7 +718,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           pointerEvents="none"
         />
 
-        {/* STM32H7 Core Chip Block */}
+        {/* STM32H743 微控制器系统核心封装块 */}
         {renderBox(
           'stm32h7',
           0, 0, 0,
@@ -736,9 +734,8 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           }
         )}
 
-        {/* Render 40 metallic gold QFP lead pins lining edge of H7 */}
+        {/* 动态计算并渲染 32 颗高质感芯片金属 QFP 引脚对齐芯片四边缘 */}
         {Array.from({ length: 8 }).map((_, idx) => {
-          // Left Edge pins
           const offset = -35 + idx * 10;
           const pStart = project(-47, offset, 0.1);
           const pEnd = project(-55, offset, -1);
@@ -752,20 +749,20 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
 
           return (
             <g key={idx} opacity={0.8} pointerEvents="none">
-              {/* Left edge */}
+              {/* 左排物理引脚 */}
               <line x1={pStart.x} y1={pStart.y} x2={pEnd.x} y2={pEnd.y} stroke="#eab308" strokeWidth={1} />
-              {/* Right edge */}
+              {/* 右排物理引脚 */}
               <line x1={pStartR.x} y1={pStartR.y} x2={pEndR.x} y2={pEndR.y} stroke="#eab308" strokeWidth={1} />
-              {/* Top edge */}
+              {/* 上排物理引脚 */}
               <line x1={pStartT.x} y1={pStartT.y} x2={pEndT.x} y2={pEndT.y} stroke="#eab308" strokeWidth={1} />
-              {/* Bottom edge */}
+              {/* 下排物理引脚 */}
               <line x1={pStartB.x} y1={pStartB.y} x2={pEndB.x} y2={pEndB.y} stroke="#eab308" strokeWidth={1} />
             </g>
           );
         })}
 
 
-        {/* === CAMERA MODULE (OV5640) === (Front Left, x < 0) */}
+        {/* === OV5640 摄像头多焦视觉传感器模块 === */}
         {renderBox(
           'ov5640',
           -220, -50, 0,
@@ -775,7 +772,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           activeModuleId === 'ov5640',
           { topFill: 'rgba(30, 20, 36, 0.85)', leftFill: 'rgba(15, 10, 24, 0.9)', rightFill: 'rgba(2, 6, 23, 0.95)' }
         )}
-        {/* Sensor housing square base */}
+        {/* 传感器紧密黑色抗强震密封盒底盘 */}
         {renderBox(
           'ov5640',
           -220, -50, 5,
@@ -785,17 +782,17 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           activeModuleId === 'ov5640',
           { topFill: 'rgba(15, 23, 42, 0.95)', leftFill: 'rgba(30, 41, 59, 0.98)', rightFill: 'rgba(15, 23, 42, 1.0)' }
         )}
-        {/* Cylindrical Lens Barrel */}
+        {/* 三维圆柱镜头主镜壳体 (Cylinder) */}
         {renderCylinder(
           'ov5640',
           -220, -50, 13, 34,
           14,
           '#ec4899',
           activeModuleId === 'ov5640',
-          activeModuleId === 'ov5645', // non matches
+          false,
           'rgba(15, 23, 42, 0.98)'
         )}
-        {/* Metal ring lining on top of lens */}
+        {/* 顶部镜口调节黄金质金属铜质对焦圈装饰 */}
         {renderCylinder(
           'ov5640',
           -220, -50, 34, 37,
@@ -803,9 +800,9 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           '#ec4899',
           activeModuleId === 'ov5640',
           activeModuleId === 'ov5640',
-          'rgba(234, 179, 8, 0.85)' // gold brass rim
+          'rgba(234, 179, 8, 0.85)'
         )}
-        {/* camera FOV virtual viewing conic projection */}
+        {/* 相机视口场角空间射影虚拟光锥渲染 */}
         {(state.simulatingSignals.camera || activeModuleId === 'ov5640') && (
           <polygon
             points={`${project(-220, -50, 37).x},${project(-220, -50, 37).y}
@@ -819,7 +816,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
         )}
 
 
-        {/* === ULTRASONIC SENSOR === (Front Right, x > 0) */}
+        {/* === SRF-SONIC 超声波雷达声呐探头测距端 === */}
         {renderBox(
           'ultrasonic',
           220, 80, 0,
@@ -829,7 +826,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           activeModuleId === 'ultrasonic',
           { topFill: 'rgba(23, 15, 36, 0.85)', leftFill: 'rgba(12, 8, 20, 0.9)', rightFill: 'rgba(2, 6, 23, 0.95)' }
         )}
-        {/* Eye Cylinder 1: Transmitter */}
+        {/* 发射声换能双圆柱体一：Transmitter (超声声波定向发射筒) */}
         {renderCylinder(
           'ultrasonic',
           220, 65, 5, 26,
@@ -839,7 +836,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           activeModuleId === 'ultrasonic',
           'rgba(30, 41, 59, 0.95)'
         )}
-        {/* Transmitter mesh texture */}
+        {/* 发射器前防尘过滤黑金属网栅 */}
         <polygon
           points={`${project(209, 65, 26.2).x},${project(209, 65, 26.2).y}
                    ${project(231, 65, 26.2).x},${project(231, 65, 26.2).y}
@@ -852,7 +849,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           pointerEvents="none"
         />
 
-        {/* Eye Cylinder 2: Receiver */}
+        {/* 接收声换能双圆柱体二：Receiver (声回响物理接收探测筒) */}
         {renderCylinder(
           'ultrasonic',
           220, 95, 5, 26,
@@ -862,10 +859,10 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           activeModuleId === 'ultrasonic',
           'rgba(30, 41, 59, 0.95)'
         )}
-        {/* Ripple vectors for sonar beams */}
+        {/* 测距波束定向反射扩散波特效渲染 */}
         {(state.simulatingSignals.ultrasonic || activeModuleId === 'ultrasonic') && (
           <g opacity={0.8} className="pointer-events-none">
-            {/* 3D Wave Arcs shooting forward right */}
+            {/* 三维前向发射环弧圈波纹特效 */}
             <path
               d={`M ${project(220, 80, 16).x + 16} ${project(220, 80, 16).y - 8} 
                   A 20 20 0 0 1 ${project(220, 80, 16).x + 40} ${project(220, 80, 16).y + 12}`}
@@ -889,7 +886,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
         )}
 
 
-        {/* === RGB CHIP TFT LCD SCREEN === (Front Center Left) */}
+        {/* === RGB TFT 高清多显彩屏玻璃面板显示区域 === */}
         {renderBox(
           'lcd',
           -60, 210, 0,
@@ -899,7 +896,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           activeModuleId === 'lcd',
           { topFill: 'rgba(15, 23, 42, 0.98)', leftFill: 'rgba(30, 41, 59, 0.95)', rightFill: 'rgba(2, 6, 23, 1.0)' }
         )}
-        {/* Screen Bezel and Glass matrix inside the top plane */}
+        {/* 亮面玻璃镜片阵列显示器（LTDC 帧流投影点阵） */}
         <polygon
           points={`${project(-101, 185, 6.2).x},${project(-101, 185, 6.2).y}
                    ${project(-19, 185, 6.2).x},${project(-19, 185, 6.2).y}
@@ -912,9 +909,9 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           className="cursor-pointer"
         />
 
-        {/* HUD UI Elements mapped onto LCD Glass */}
+        {/* 在显示屏镜面上显示模拟边缘 HUD 信息图形叠加（AI 图像诊断） */}
         <g pointerEvents="none" opacity={state.simulatingSignals.lcd || activeModuleId === 'lcd' ? 0.95 : 0.5}>
-          {/* Mock green grid lines bounding box */}
+          {/* AI 目标检测边框模拟 (绿色矩形选定标志物) */}
           <polygon
             points={`${project(-85, 195, 6.4).x},${project(-85, 195, 6.4).y}
                      ${project(-45, 195, 6.4).x},${project(-45, 195, 6.4).y}
@@ -924,7 +921,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
             stroke="#10b981"
             strokeWidth={1}
           />
-          {/* Bounding box confidence header */}
+          {/* 拟物级目标对焦状态对焦边角标注 */}
           <line
             x1={project(-85, 195, 6.4).x} y1={project(-85, 195, 6.4).y}
             x2={project(-65, 195, 6.4).x} y2={project(-65, 195, 6.4).y}
@@ -932,7 +929,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
             strokeWidth={2}
           />
 
-          {/* AI Graph indicator line inside display */}
+          {/* 右下角心率与信号刷新率等折线统计谱 */}
           <path
             d={`M ${project(-38, 202, 6.4).x} ${project(-38, 202, 6.4).y} 
                 L ${project(-32, 212, 6.4).x} ${project(-32, 212, 6.4).y}
@@ -942,7 +939,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
             stroke={primaryAccent}
             strokeWidth={1.2}
           />
-          {/* Signal Indicator Dot */}
+          {/* 终点闪烁极光指示点 */}
           <circle 
             cx={project(-20, 222, 6.4).x} 
             cy={project(-20, 222, 6.4).y} 
@@ -954,27 +951,27 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
         </g>
       </svg>
 
-      {/* Floating Canvas UI Controls Overlay */}
+      {/* 覆盖在上层的空间调节辅助控制器 */}
       <div className="absolute bottom-4 left-4 flex items-center gap-2 z-20">
         <button 
           onClick={resetView}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900/80 border border-slate-800 text-xs text-slate-400 hover:text-white hover:bg-slate-800/80 transition-all font-mono"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900/80 border border-slate-800 text-xs text-slate-400 hover:text-white hover:bg-slate-800/80 transition-all font-mono cursor-pointer"
           id="btn-viewport-reset"
-          title="Reset pan and zoom coordinate matrices"
+          title="重置缩放视角和拖拽中心位置"
         >
-          RESET CAMERA
+          重置视角
         </button>
         <div className="text-[10px] font-mono text-slate-500 bg-slate-900/40 px-2 py-1 rounded border border-slate-800/30">
-          ZOOM: {Math.round(zoom * 100)}%
+          缩放: {Math.round(zoom * 100)}%
         </div>
       </div>
 
       <div className="absolute top-4 left-4 z-20 flex flex-col gap-1 pointer-events-none">
         <div className="text-xs font-mono tracking-wider font-semibold text-slate-400 uppercase">
-          Engineering Poster Layout
+          等轴测系统架构模型
         </div>
         <div className="text-[9px] font-mono text-slate-600">
-          PROJECTION: TRUE ISOMETRIC 30° // RATIO: WIDESCREEN 1.4:1
+          投影类型: 30°等轴测三维投影 // 画幅比: 1.4:1
         </div>
       </div>
     </div>

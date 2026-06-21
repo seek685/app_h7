@@ -39,7 +39,7 @@ export const ModuleInspector: React.FC<ModuleInspectorProps> = ({ module, accent
     }
   };
 
-  // If no module is selected, render an overview of the system architecture spec
+  // 如果没有选中任何模块，则渲染系统整体架构规范的概览
   if (!module) {
     return (
       <div 
@@ -51,54 +51,52 @@ export const ModuleInspector: React.FC<ModuleInspectorProps> = ({ module, accent
             <div className="flex items-center gap-2">
               <span className="flex h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
               <h3 className="font-mono text-sm tracking-wider font-semibold text-slate-200">
-                ARCHITECTURE OVERVIEW
+                系统架构总览 (ARCHITECTURE OVERVIEW)
               </h3>
             </div>
             <span className="text-[10px] font-mono text-cyan-500 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
-              STABLE INFRA
+              硬件工作组
             </span>
           </div>
 
           <div className="space-y-3">
             <h4 className="text-lg font-sans font-medium tracking-tight text-white">
-              Embedded Edge AI Camera System
+              嵌入式边缘人工智能摄像机系统
             </h4>
             <p className="text-xs text-slate-400 leading-relaxed">
-              This interactive visual CAD poster highlights the high-speed data flow and hardware configuration 
-              of an edge AI camera architecture. Powered by dual-bus topologies, the system operates completely 
-              offline for local machine vision processes, updating displays and sending telemetry through 
-              glowing, synchronized communication pathways.
+              该交互式三维 CAD 海报展示了边缘 AI 摄像机架构的高速数据流和硬件配置。
+              基于双总线拓扑，系统完全离线进行本地机器视觉处理，并通过同步发光的通信通道实时更新显示屏并上传遥测数据。
             </p>
           </div>
 
-          {/* Quick specs section */}
+          {/* 快捷规格特征 */}
           <div className="grid grid-cols-2 gap-3 pt-2">
             <div className="bg-slate-950/70 rounded-xl border border-slate-850 p-3 flex flex-col gap-1.5">
-              <span className="text-[9px] font-mono text-slate-500 tracking-wider uppercase">CORE CHIP CONTROLLER</span>
+              <span className="text-[9px] font-mono text-slate-500 tracking-wider uppercase">主控中央芯片</span>
               <span className="text-xs font-mono font-bold text-slate-300">STM32H7 (ARM-M7)</span>
             </div>
             <div className="bg-slate-950/70 rounded-xl border border-slate-850 p-3 flex flex-col gap-1.5">
-              <span className="text-[9px] font-mono text-slate-500 tracking-wider uppercase">LOCAL TENSOR SPEED</span>
-              <span className="text-xs font-mono font-bold text-slate-300">1027 DMIPS Peak</span>
+              <span className="text-[9px] font-mono text-slate-500 tracking-wider uppercase">本地推理峰值速度</span>
+              <span className="text-xs font-mono font-bold text-slate-300">1027 DMIPS / 2.02 CoreMark</span>
             </div>
             <div className="bg-slate-950/70 rounded-xl border border-slate-850 p-3 flex flex-col gap-1.5">
-              <span className="text-[9px] font-mono text-slate-500 tracking-wider uppercase">PRIMARY SENSOR BUS</span>
-              <span className="text-xs font-mono font-bold text-slate-300">8-bit Parallel DCMI</span>
+              <span className="text-[9px] font-mono text-slate-500 tracking-wider uppercase">主摄像头采集总线</span>
+              <span className="text-xs font-mono font-bold text-slate-300">8位高速并行 DCMI</span>
             </div>
             <div className="bg-slate-950/70 rounded-xl border border-slate-850 p-3 flex flex-col gap-1.5">
-              <span className="text-[9px] font-mono text-slate-500 tracking-wider uppercase">WIRELESS BACKBONE</span>
-              <span className="text-xs font-mono font-bold text-slate-300">4-bit SDIO Interface</span>
+              <span className="text-[9px] font-mono text-slate-500 tracking-wider uppercase">无线通信骨干</span>
+              <span className="text-xs font-mono font-bold text-slate-300">4位并行 SDIO v2.0</span>
             </div>
           </div>
 
-          {/* Prompt adherence indicator */}
+          {/* 三维图Adherence说明 */}
           <div className="rounded-xl border border-slate-850 bg-slate-950/40 p-3">
             <div className="flex items-start gap-2.5">
               <ShieldCheck className="text-emerald-500 shrink-0 mt-0.5" size={16} />
               <div className="flex flex-col gap-0.5">
-                <span className="text-xs font-semibold text-slate-300">Unlabeled Poster Standard</span>
+                <span className="text-xs font-semibold text-slate-300">无标签极简制图风格规范</span>
                 <p className="text-[10px] text-slate-500 leading-normal">
-                  No text labels reside on the 3D drawing structure. Tap or hover over modules to trigger this dynamic probe interface.
+                  等轴测三维渲染主体上无刻板的文字标签装饰。通过用鼠标点击或悬停在不同器件块区，即可唤醒该多合一全功能检测探针。
                 </p>
               </div>
             </div>
@@ -108,7 +106,7 @@ export const ModuleInspector: React.FC<ModuleInspectorProps> = ({ module, accent
         <div className="border-t border-slate-850 pt-4 mt-6">
           <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-500">
             <Activity size={10} className="text-slate-400 animate-pulse" />
-            <span>Telemetry online. Standby for sensor probing...</span>
+            <span>遥测正常。请通过点击主板上的不同硬件模块来进行实时探测和引脚分析...</span>
           </div>
         </div>
       </div>
@@ -121,7 +119,7 @@ export const ModuleInspector: React.FC<ModuleInspectorProps> = ({ module, accent
       id={`inspector-${module.id}`}
     >
       <div className="space-y-5">
-        {/* Module Header */}
+        {/* 模块页眉 */}
         <div className="flex items-start justify-between border-b border-slate-800 pb-3">
           <div className="flex items-center gap-2.5">
             <div className={`p-2 rounded-lg border ${getAccentBgClass(accentColor)}`}>
@@ -130,7 +128,7 @@ export const ModuleInspector: React.FC<ModuleInspectorProps> = ({ module, accent
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-[9px] font-mono font-medium text-slate-500 tracking-wider uppercase">
-                  NODE TYPE:
+                  节点分类:
                 </span>
                 <span className={`text-[9px] font-mono font-bold px-1 rounded uppercase tracking-wider ${getAccentBgClass(accentColor)}`}>
                   {module.acronym}
@@ -142,40 +140,40 @@ export const ModuleInspector: React.FC<ModuleInspectorProps> = ({ module, accent
             </div>
           </div>
           <span className="text-[10px] font-mono text-slate-500 mt-1">
-            0x{module.id.charCodeAt(0).toString(16).toUpperCase()}
+            十六进制地址: 0x{module.id.charCodeAt(0).toString(16).toUpperCase()}
           </span>
         </div>
 
-        {/* Status indicator bar */}
+        {/* 通信连接状态 */}
         <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-950/55 border border-slate-850 text-xs">
-          <span className="text-slate-400 font-mono text-[10px] uppercase">Connection Port Status:</span>
+          <span className="text-slate-400 font-mono text-[10px] uppercase">连接物理通信端口状态:</span>
           <div className="flex items-center gap-1.5">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span className="font-mono text-emerald-400 text-[10px] font-bold uppercase tracking-wider">ACTIVE LINK</span>
+            <span className="font-mono text-emerald-400 text-[10px] font-bold uppercase tracking-wider">连接握手成功</span>
           </div>
         </div>
 
-        {/* Detailed functional role description */}
+        {/* 核心描述 */}
         <div className="space-y-1.5">
           <h4 className="text-[10px] font-mono text-slate-500 tracking-wider uppercase flex items-center gap-1">
             <Tag size={10} />
-            FUNCTIONAL INTEGRATION ROLE:
+            器件集成功能定位:
           </h4>
           <p className="text-xs text-slate-300 leading-relaxed font-sans bg-slate-950/20 p-2.5 rounded-lg border border-slate-850/60">
             {module.role}
           </p>
         </div>
 
-        {/* Electrical & Hardware specifications */}
+        {/* 电气规格 & 硬件诊断规范 */}
         <div className="space-y-2">
           <h4 className="text-[10px] font-mono text-slate-500 tracking-wider uppercase flex items-center gap-1">
             <Layers size={10} />
-            DIAGNOSTIC SPECIFICATIONS:
+            关键技术规格诊断:
           </h4>
-          <div className="grid grid-cols-2 gap-2 bg-slate-950/40 p-2.5 rounded-lg border border-slate-850/60">
+          <div className="grid grid-cols-2 gap-2 bg-slate-950/40 p-2.5 rounded-lg border border-slate-850/60 font-mono">
             {Object.entries(module.specs).map(([key, value]) => (
               <div key={key} className="flex flex-col gap-0.5">
                 <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wide">{key}</span>
@@ -185,11 +183,11 @@ export const ModuleInspector: React.FC<ModuleInspectorProps> = ({ module, accent
           </div>
         </div>
 
-        {/* Pin Out mapping layout */}
+        {/* 物理排布引脚映射 */}
         <div className="space-y-2">
           <h4 className="text-[10px] font-mono text-slate-500 tracking-wider uppercase flex items-center gap-1">
             <Zap size={10} />
-            PERIPHERAL BUS CONNECTIONS to STM32H7:
+            硬件外设连接到 STM32H7 物理引脚映射:
           </h4>
           <div className="bg-slate-950/80 rounded-xl border border-slate-850 p-2.5 max-h-[140px] overflow-y-auto custom-scrollbar font-mono">
             {module.pins && module.pins.length > 0 ? (
@@ -204,19 +202,19 @@ export const ModuleInspector: React.FC<ModuleInspectorProps> = ({ module, accent
                 ))}
               </div>
             ) : (
-              <span className="text-[10px] text-slate-600 italic">No direct hardware physical pin assignments</span>
+              <span className="text-[10px] text-slate-600 italic">在模型架构内无直接焊接针脚映射要求</span>
             )}
           </div>
         </div>
 
-        {/* Technical communication protocol specs */}
+        {/* 通信协议总带宽等技术细节 */}
         <div className="grid grid-cols-2 gap-2.5 pt-1">
           <div className="flex flex-col gap-0.5">
-            <span className="text-[9px] font-mono text-slate-500 uppercase">VOLTAGE SPECS</span>
+            <span className="text-[9px] font-mono text-slate-500 uppercase">工作额定电压标准</span>
             <span className="text-xs font-mono text-slate-200 font-bold">{module.voltage}</span>
           </div>
           <div className="flex flex-col gap-0.5">
-            <span className="text-[9px] font-mono text-slate-500 uppercase">BUS BANDWIDTH SPEED</span>
+            <span className="text-[9px] font-mono text-slate-500 uppercase">总线或空口运行速率</span>
             <span className="text-xs font-mono text-slate-200 font-bold">{module.speed}</span>
           </div>
         </div>
@@ -225,7 +223,7 @@ export const ModuleInspector: React.FC<ModuleInspectorProps> = ({ module, accent
       <div className="border-t border-slate-850 pt-4 mt-6">
         <div className="flex items-center gap-1 text-[10px] font-mono text-slate-500">
           <Activity size={10} className="text-slate-400 animate-pulse" />
-          <span>Protocol Bus:</span>
+          <span>核心物理总线:</span>
           <span className="text-slate-300 font-bold uppercase">{module.protocol}</span>
         </div>
       </div>

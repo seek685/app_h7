@@ -6,7 +6,7 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
-/* Custom Tactical Scanline Overlay pattern */
+/* 战术示波器复古扫描线叠加层效果 */
 .bg-scanlines {
   background: linear-gradient(
     rgba(18, 16, 16, 0) 50%, 
@@ -15,7 +15,7 @@
   background-size: 100% 4px;
 }
 
-/* Radical Ambient Vignette for the dashboard viewport */
+/* 中央三维视口的径向深色边缘晕影遮罩 */
 .bg-radial-vignette {
   background: radial-gradient(
     ellipse at center, 
@@ -24,7 +24,7 @@
   );
 }
 
-/* High-tech custom scrollbar style for diagnostic logs */
+/* 用于诊断日志输出框的高科技微型滚动条样式 */
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
   height: 4px;

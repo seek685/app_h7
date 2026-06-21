@@ -10,7 +10,7 @@ export interface ModuleInfo {
   voltage: string;
   speed: string;
   status: 'idle' | 'transmitting' | 'receiving' | 'active' | 'error';
-  color: string; // Neon accent hex/tailwind class
+  color: string; // 霓虹高亮色十六进制值或 Tailwind 类名
 }
 
 export type ThemeAccent = 'cyan' | 'magenta' | 'yellow' | 'red';
@@ -20,7 +20,7 @@ export interface InteractiveState {
   accentColor: ThemeAccent;
   isGridVisible: boolean;
   isScanlineVisible: boolean;
-  glowIntensity: number; // 0 to 5
+  glowIntensity: number; // 发光强度 (0 到 5)
   traceSpeed: 'slow' | 'normal' | 'fast';
   simulatingSignals: {
     camera: boolean;

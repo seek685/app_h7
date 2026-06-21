@@ -8,19 +8,15 @@ import {
   Terminal, 
   Cpu, 
   Info, 
-  HelpCircle, 
   Download, 
   Zap, 
-  Layers, 
-  Activity,
-  FileCheck2,
   Bookmark
 } from 'lucide-react';
 
 export default function App() {
-  // Main app state
+  // 核心交互状态
   const [state, setState] = useState<InteractiveState>({
-    activeModuleId: null, // hovered or selected module ID
+    activeModuleId: null, // 悬停或选中的硬件模块 ID
     accentColor: 'cyan',
     isGridVisible: true,
     isScanlineVisible: true,
@@ -35,14 +31,14 @@ export default function App() {
     }
   });
 
-  // Local state for synthetic Edge AI terminal log streams
+  // 片上仿真的 TinyML 边缘神经网络实时推理日志
   const [aiInferenceRunning, setAiInferenceRunning] = useState<boolean>(true);
   const [inferenceLogs, setInferenceLogs] = useState<string[]>([
-    '[INIT] STM32Cube.AI core loaded successfully.',
-    '[SYSTEM] Frame buffer 0 & 1 allocated at SRAM bank 1 (0x30000000).',
-    '[NETWORK] Listening on EXTI Line 0 (Ultrasonic Sensor timer gate).',
-    '[STANDBY] OV5640 ready. Frame capture standard: RGB565 WVGA format.',
-    '[INF] Running quantized YOLO-Nano CNN on-chip weight tensors...'
+    '[初始化 INIT] STM32Cube.AI 边缘神经网络推理核心成功加载。',
+    '[系统运行 SYSTEM] 帧双缓冲区 #0 与 #1 开辟于高速本地静态 SRAM1 区间 (0x30000000)。',
+    '[总线侦听 NETWORK] 正在侦听外部中断线 EXTI Line 0 (超声测距定时器开窗门限)。',
+    '[就绪就绪 STANDBY] OV5640 镜组校准对焦完成。图像捕获格式: WVGA RGB565，30FPS。',
+    '[推理运行 INF] 正在片上算力核心中加载 YOLO-Nano 神经网络权值进行图像识别推理...'
   ]);
 
   const handleHoverModule = (moduleId: string | null) => {
@@ -75,9 +71,9 @@ export default function App() {
     setState(prev => ({ ...prev, traceSpeed: speed }));
   };
 
-  // Triggers trace bus animation flow and updates telemetry logs synthetically
+  // 在总线路径上触发仿真脉冲，并实时追加模拟出的工程规格遥测日志
   const handleTriggerSignal = (signalKey: keyof InteractiveState['simulatingSignals']) => {
-    // 1. Flip active trace stream state
+    // 1. 打开相应总线的亮起仿真状态
     setState(prev => ({
       ...prev,
       simulatingSignals: {
@@ -86,27 +82,27 @@ export default function App() {
       }
     }));
 
-    // 2. Synthesize clean engineering logs
+    // 2. 仿真生成高精确度的嵌入式中文工程诊断日志
     const timestamp = new Date().toISOString().slice(11, 19);
     let logMsg = '';
     switch (signalKey) {
       case 'camera':
-        logMsg = `[DCMI] [${timestamp}] Camera frame interrupt received index #244. Copying 384KB to MCU frame RAM.`;
+        logMsg = `[DCMI 视频总声] [${timestamp}] 收到摄像头输入 DMA 图像更新中断 #244。拷贝 384KB 直驱数据到主控 RAM 帧缓存中。`;
         break;
       case 'lcd':
-        logMsg = `[LTDC] [${timestamp}] Chrom-ART DMA2D transfer complete. Double buffer swapped. Swapped to RAM bank 2.`;
+        logMsg = `[LTDC 显示总线] [${timestamp}] Chrom-ART DMA2D 图形加速器拷贝完成。帧缓冲双存完成乒乓切换(静态闪存区间 swap)。`;
         break;
       case 'ultrasonic':
-        logMsg = `[TIMER] [${timestamp}] Input capture edge detected. Sound run duration: 1140us. Sensed distance: 19.53 cm.`;
+        logMsg = `[输入捕获定时器] [${timestamp}] 捕获到测距回响上升沿跳变信号。脉宽持续: 1140us。解算出避障安全红线距离: 19.53 厘米。`;
         break;
       case 'wifi':
-        logMsg = `[SDIO] [${timestamp}] MQTT payload packed: { "dist": 19.53, "objects": ["person"] }. Commencing ESP32 SDIO burst.`;
+        logMsg = `[SDIO 骨干网络] [${timestamp}] 遥测上行负载封包就绪: { "障碍物距离": 19.53, "识别目标": ["人"] }。调校启动 WiFi 物联网传输链路。`;
         break;
     }
 
     setInferenceLogs(prev => [logMsg, ...prev.slice(0, 10)]);
 
-    // 3. Clear trace stream animation after timeout
+    // 3. 3 秒后关闭该发光脉冲，以供下一次总线信号的重触发
     setTimeout(() => {
       setState(prev => ({
         ...prev,
@@ -116,11 +112,11 @@ export default function App() {
         }
       }));
 
-      // If it's wifi, auto trigger cloud sync for complete data flow path
+      // 如果触动的是WiFi突发，那么3秒后自然联动发往上云，完成一整条硬件通路到分布式服务的回路仿真
       if (signalKey === 'wifi') {
         setState(prev => ({ ...prev, simulatingSignals: { ...prev.simulatingSignals, cloud: true } }));
         setInferenceLogs(prev => [
-          `[CLOUD] [${timestamp}] Ingress Broker ACK received (200 OK). Deciphered AES-256 telemetry envelope.`,
+          `[云端联动 CLOUD] [${timestamp}] 远程云网物联网 Broker 响应 ACK(200)。完成 AES-256 高安全性多重信道数据解密归档。`,
           ...prev.slice(0, 10)
         ]);
         setTimeout(() => {
@@ -130,20 +126,20 @@ export default function App() {
     }, 3000);
   };
 
-  // Run or Pause live model inference loop
+  // 开关或挂起智能分类环路的运行
   const toggleAiInference = () => {
     setAiInferenceRunning(prev => !prev);
-    const logTag = aiInferenceRunning ? '[STOP]' : '[RUN]';
+    const logTag = aiInferenceRunning ? '[停止挂起 STOP]' : '[恢复装载 RUN]';
     setInferenceLogs(prev => [
-      `${logTag} On-chip visual neural network classifier has been ${aiInferenceRunning ? 'PAUSED' : 'RESUMED'}.`,
+      `${logTag} 主控芯片上搭载的 TinyML 特征目标分类网络运行状态已被${aiInferenceRunning ? 'PAUSED(挂起停止)' : 'RESUMED(恢复执行)'}。`,
       ...prev.slice(0, 10)
     ]);
   };
 
-  // Look up selected module
+  // 获取当前选中的硬件节点
   const currentModule = MODULES_DATA.find(m => m.id === state.activeModuleId) || null;
 
-  // Render glowing border/headings based on theme accent
+  // 根据当前霓虹配色风格获取相应的 Tailwind 类名
   const getThemeAccentClass = (accent: ThemeAccent): string => {
     switch (accent) {
       case 'cyan': return 'text-cyan-400 border-cyan-500/30';
@@ -187,7 +183,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#020617] text-slate-100 flex flex-col font-sans selection:bg-cyan-500/20 selection:text-cyan-200">
       
-      {/* Top Professional Header Row */}
+      {/* 顶部专业工具级导航排首 */}
       <header className="border-b border-slate-900 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -196,63 +192,63 @@ export default function App() {
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-[10px] font-mono font-bold text-slate-400 tracking-widest uppercase">
-                  STM32H7 Embedded AI Architecture
+                  STM32H7 嵌入式边缘人工智能硬件系统
                 </span>
               </div>
               <h1 className="text-xl font-bold tracking-tight text-white font-sans uppercase">
-                EMBEDDED CAMERA SYSTEM DIAGRAM
+                嵌入式摄像机系统三维架构关系图
               </h1>
             </div>
           </div>
 
           <div className="flex items-center gap-3.5 self-stretch sm:self-auto justify-between border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-900">
             <div className="text-right hidden md:flex flex-col font-mono text-[10px] text-slate-500">
-              <span>SYSTEM CAD MODULE: REV 3.4</span>
-              <span>COMPILATION SCORE: 100% SUCCESS</span>
+              <span>系统 CAD 编译版本: REV 3.4</span>
+              <span>主板电路检测阻抗: 100% 匹配闭合</span>
             </div>
             
             <button 
               onClick={handlePrintMockup}
-              className={`flex items-center gap-1.5 px-3 py-1.8 rounded-lg bg-slate-900 border ${getThemeBorderClass(state.accentColor)} text-xs ${getThemeTextClass(state.accentColor)} hover:bg-slate-800 transition-all font-mono`}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-900 border ${getThemeBorderClass(state.accentColor)} text-xs ${getThemeTextClass(state.accentColor)} hover:bg-slate-800 transition-all font-mono cursor-pointer`}
               id="btn-print"
-              title="Print layout as an engineering competition poster"
+              title="将目前的总线及模型排版图输出为一张标准学术和竞赛演示海报格式"
             >
               <Download size={14} />
-              EXPORT POSTER
+              导出海报大图 (PRINT)
             </button>
           </div>
         </div>
       </header>
 
-      {/* Main Container / Content Bento Grid */}
+      {/* 核心工作台主区块 / 栅格排布 */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         
-        {/* Main Workspace Frame */}
+        {/* 全尺寸面板空间布局 */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
-          {/* Main CAD Interactive Canvas stage - Col span 7 */}
+          {/* 左侧重点：三维交互 CAD 虚拟画布区域 (占用 8 栅格) */}
           <section className="lg:col-span-8 flex flex-col gap-4">
             
-            {/* Header detail */}
+            {/* 头饰参数及快速说明 */}
             <div className={`flex items-center justify-between bg-gradient-to-r ${getThemeGlowBg(state.accentColor)} border-l-2 ${getThemeBorderClass(state.accentColor).replace('border-', 'border-l-')} pl-3 py-1`}>
               <div className="flex flex-col">
                 <h2 className="text-sm font-semibold tracking-wider text-white font-mono uppercase">
-                  3D ISOMETRIC ENGINEERING POSTER
+                  3D 立体等轴测工程设计投影
                 </h2>
                 <span className="text-[10px] font-mono text-slate-500">
-                  Tap to probe physical modules. Click "Reset Camera" to center layout frame.
+                  点击硬件芯片、换能探头或传感器。你也可以直接按住鼠标随意拖拽空间平面、上下滚动滑轮缩放。
                 </span>
               </div>
               
               <div className="flex items-center gap-1.5 text-xs text-slate-400 font-mono">
                 <Bookmark size={12} className="text-slate-500" />
-                <span>No Labels Mode</span>
+                <span>极简高科技模型</span>
               </div>
             </div>
 
-            {/* Stage */}
+            {/* 核心等轴测视图舞台 */}
             <IsometricDiagram
               state={state}
               onHoverModule={handleHoverModule}
@@ -260,40 +256,45 @@ export default function App() {
               activeModuleId={state.activeModuleId}
             />
 
-            {/* Poster Legend and schematic notes */}
+            {/* 演示用海报工程标注及设计细则附注 */}
             <div className="bg-slate-900/30 rounded-xl border border-slate-900 p-4 font-mono text-[11px] text-slate-400 space-y-3">
               <div className="flex items-start gap-2">
-                <Info size={14} className="text-primary shrink-0 mt-0.5" />
+                <Info size={14} className="text-primary shrink-0 mt-0.5 text-cyan-400" />
                 <p className="leading-relaxed">
-                  <strong>Poster Engineering Design Note:</strong> This diagram renders an advanced 3D isometric representation of an AI camera hardware stack. To preserve the aesthetic format required for the competition poster, <strong>all system text labels on the actual canvas have been omitted</strong>. Components are decipherable via high-fidelity geometric modeling.
+                  <strong>学术竞赛海报工程附注:</strong> 本三维交互关系图采用 30° 精准等轴测空间算法离线渲染生成。
+                  为了确保能在竞赛展示展板上维持精简、纯粹且高质感的学术海报规格，
+                  <strong>制图主干上无任何刻板繁冗的文字标签标识</strong>。
+                  所有外围总线和板载电容线路一目了然，您可以直接在屏幕上对元件进行点控，在右侧检测台查看完整的引脚分配详情。
                 </p>
               </div>
+              
+              {/* 总线配色图例指引 */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-1 text-[10px]">
                 <div className="flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-pink-500 shadow-[0_0_6px_rgba(236,72,153,0.6)]" />
-                  <span>DCMI Video Bus</span>
+                  <span>DCMI 高速摄像头视频总线</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-yellow-500 shadow-[0_0_6px_rgba(234,179,8,0.6)]" />
-                  <span>LTDC LCD Lines</span>
+                  <span>LTDC 24位并行 LCD 控制总线</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-purple-500 shadow-[0_0_6px_rgba(168,85,247,0.6)]" />
-                  <span>EXTI Distance Capture</span>
+                  <span>EXTI 第0组外部中断定时测距线</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)]" />
-                  <span>4-bit SDIO WiFi Bus</span>
+                  <span>4位并行 SDIO v2.0 无线通信总线</span>
                 </div>
               </div>
             </div>
 
           </section>
 
-          {/* Sidebar module inspection console - Col span 5 */}
+          {/* 右侧重点：探测数据调试端与神经网络监控 HUD (占用 4 栅格) */}
           <section className="lg:col-span-4 flex flex-col gap-6">
             
-            {/* Inspector */}
+            {/* 智能引脚及技术参数检测台 */}
             <div className="h-full">
               <ModuleInspector 
                 module={currentModule} 
@@ -301,13 +302,13 @@ export default function App() {
               />
             </div>
 
-            {/* Local Artificial Intelligence Code Logs Console - TinyML Live HUD */}
+            {/* 板载 TinyML 卷积神经网络参数监控仪 (人工仿真，极富极客质感) */}
             <div className="bg-slate-950 rounded-2xl border border-slate-900 p-4 space-y-3 shadow-2xl">
               <div className="flex items-center justify-between border-b border-slate-850 pb-2">
                 <div className="flex items-center gap-1.5">
                   <Terminal size={14} className="text-slate-400 animate-pulse" />
                   <span className="text-[10px] font-mono font-bold tracking-wider text-slate-300">
-                    ON-CHIP TINYML CNN LOGS
+                    片上 TINYML CNN 核心诊断终端 
                   </span>
                 </div>
                 <button
@@ -318,22 +319,23 @@ export default function App() {
                       : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300'
                   }`}
                   id="btn-toggle-inference"
-                  title="Pause or resume dynamic synthetic AI models running on the microcontroller"
+                  title="控制及挂起芯片主板上微型神经网络模型计算循环的触发"
                 >
-                  {aiInferenceRunning ? 'RUNNING' : 'PAUSED'}
+                  {aiInferenceRunning ? '运行中 RUNNING' : '已暂停 PAUSED'}
                 </button>
               </div>
 
+              {/* 日志监控输出框 */}
               <div className="bg-black/80 rounded-xl border border-slate-900 p-2.5 h-[135px] overflow-y-auto font-mono text-[9px] text-slate-400 space-y-1.5 custom-scrollbar relative">
                 {inferenceLogs.map((log, index) => {
                   let color = 'text-slate-400';
-                  if (log.includes('[DCMI]')) color = 'text-pink-400';
-                  else if (log.includes('[LTDC]')) color = 'text-yellow-400';
-                  else if (log.includes('[TIMER]')) color = 'text-purple-400';
-                  else if (log.includes('[CLOUD]')) color = 'text-orange-400';
-                  else if (log.includes('[SDIO]')) color = 'text-emerald-400';
-                  else if (log.includes('[INIT]') || log.includes('[RUN]')) color = 'text-cyan-400';
-                  else if (log.includes('[STOP]')) color = 'text-red-400';
+                  if (log.includes('[DCMI')) color = 'text-pink-400';
+                  else if (log.includes('[LTDC')) color = 'text-yellow-400';
+                  else if (log.includes('[TIMER')) color = 'text-purple-400';
+                  else if (log.includes('[CLOUD')) color = 'text-orange-400';
+                  else if (log.includes('[SDIO')) color = 'text-emerald-400';
+                  else if (log.includes('[初始化') || log.includes('[就绪') || log.includes('[恢复')) color = 'text-cyan-400';
+                  else if (log.includes('[停止')) color = 'text-red-400';
 
                   return (
                     <div 
@@ -349,8 +351,8 @@ export default function App() {
               </div>
 
               <div className="flex items-center justify-between text-[9px] font-mono text-slate-500 px-1">
-                <span>MODEL WEIGHTS: INT8 QUANTIZED</span>
-                <span>BIAS CALIBRATION: AUTO</span>
+                <span>模型参数加载规格: INT8 固化对称量化</span>
+                <span>偏置漂移平衡补偿: 微控制器片上全自动对齐</span>
               </div>
             </div>
 
@@ -358,7 +360,7 @@ export default function App() {
 
         </div>
 
-        {/* Telemetry settings console and dynamic control deck */}
+        {/* 覆盖在底部的大型交互仿真通信总线控制器 */}
         <TelemetryConsole
           state={state}
           onChangeAccent={handleChangeAccent}
@@ -370,14 +372,14 @@ export default function App() {
 
       </main>
 
-      {/* Corporate/Competition footer standard */}
+      {/* 竞赛海报学术页脚标准，符合大会惯例 */}
       <footer className="border-t border-slate-900 bg-slate-950 py-5 mt-auto text-center">
         <div className="max-w-7xl mx-auto px-4 font-mono text-[10px] text-slate-500 space-y-1">
           <p className="uppercase tracking-wider">
-            PREPARED SPECIFICALLY FOR THE 2026 EMBEDDED EDGE AI SYSTEM ENGINEERING CONTEST
+            专为 2026 届嵌入式边缘人工智能硬件系统工程设计大赛成果汇报特制发布
           </p>
           <p className="opacity-75">
-            ALL VECTOR GRAPHICS ARE MATHEMATICALLY PROJECTED IN STATIC CSS/SVG MATRIX. NO THIRD-PARTY WEBGL ASSETS REQUIRED.
+            全部三维硬件节点及交互轨迹均通过高效率 SVG 空间矩阵进行直接投影渲染，无任何第三方 WebGL 底层包约束，轻量高性能。
           </p>
         </div>
       </footer>
