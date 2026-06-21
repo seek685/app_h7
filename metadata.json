@@ -1,0 +1,6 @@
+{
+  "name": "Embedded AI Camera Architecture Diagram",
+  "description": "An interactive, 3D isometric engineering poster and simulator of an embedded AI camera architectural system, featuring a highly-detailed cyberpunk SVG diagram with trace pulsing animations, real-time signal simulation, and detailed module inspection controls.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
