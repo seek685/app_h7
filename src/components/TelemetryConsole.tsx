@@ -1,6 +1,6 @@
 import React from 'react';
 import { InteractiveState, ThemeAccent } from '../types';
-import { Grid, Sliders, Zap, Play, Check, Eye, RefreshCw, Radio, Database } from 'lucide-react';
+import { Grid, Sliders, Zap, Play, Check, Eye, RefreshCw, Radio, Database, Volume2 } from 'lucide-react';
 
 interface TelemetryConsoleProps {
   state: InteractiveState;
@@ -46,7 +46,7 @@ export const TelemetryConsole: React.FC<TelemetryConsoleProps> = ({
           <Zap size={11} className="text-amber-500" />
           全通信总线链路注入器 (点击发射同步信号)
         </h4>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5">
           {/* 摄像头总线信号发射 */}
           <button
             onClick={() => onTriggerSignal('camera')}
@@ -79,12 +79,12 @@ export const TelemetryConsole: React.FC<TelemetryConsoleProps> = ({
                 : 'bg-slate-950/60 border-slate-850 text-slate-400 hover:border-slate-700 hover:text-slate-300'
             }`}
             id="trigger-signal-lcd"
-            title="通过 24 位并行 RGB 液晶总线驱动实时帧缓冲区更新"
+            title="通过 FMC 8080 并行总线驱动液晶屏显示数据帧周期更新"
           >
             <div className="flex items-center justify-between">
               <RefreshCw size={14} className={state.simulatingSignals.lcd ? "text-yellow-400 animate-spin" : "text-slate-500"} />
               <span className="text-[8px] font-mono uppercase bg-slate-900 px-1 py-0.5 rounded border border-slate-800 text-slate-300">
-                LTDC 像素
+                FMC 8080并口
               </span>
             </div>
             <div className="flex flex-col">
@@ -125,17 +125,40 @@ export const TelemetryConsole: React.FC<TelemetryConsoleProps> = ({
                 : 'bg-slate-950/60 border-slate-850 text-slate-400 hover:border-slate-700 hover:text-slate-300'
             }`}
             id="trigger-signal-wifi"
-            title="通过硬件 SDIO 传输通道，与无线空口及远程 MQTT 服务器握手同步物联网指标"
+            title="通过 SPI2 高速总线传输通道，对外网无线及远程云平台同步物联网指标"
           >
             <div className="flex items-center justify-between">
               <Database size={14} className={state.simulatingSignals.wifi ? "text-emerald-400 animate-bounce" : "text-slate-500"} />
               <span className="text-[8px] font-mono uppercase bg-slate-900 px-1 py-0.5 rounded border border-slate-800 text-slate-300">
-                SDIO + MQTT
+                SPI2 + MQTT
               </span>
             </div>
             <div className="flex flex-col">
               <span className="text-[11px] font-sans font-bold">云端网络遥测同步</span>
               <span className="text-[8px] font-mono text-slate-500 uppercase mt-0.5">WiFi ➔ 物联网云</span>
+            </div>
+          </button>
+
+          {/* SYN6288 语音合成触发信号 */}
+          <button
+            onClick={() => onTriggerSignal('voice')}
+            className={`flex flex-col gap-1.5 p-3 rounded-xl border text-left cursor-pointer transition-all ${
+              state.simulatingSignals.voice
+                ? 'bg-amber-500/10 border-amber-500 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.15)]'
+                : 'bg-slate-950/60 border-slate-850 text-slate-400 hover:border-slate-700 hover:text-slate-300'
+            }`}
+            id="trigger-signal-voice"
+            title="通过 UART2 异步串口下发中文告警报文字句，触发 SYN6288 播报合成演示"
+          >
+            <div className="flex items-center justify-between">
+              <Volume2 size={14} className={state.simulatingSignals.voice ? "text-amber-400 animate-pulse" : "text-slate-500"} />
+              <span className="text-[8px] font-mono uppercase bg-slate-900 px-1 py-0.5 rounded border border-slate-800 text-slate-300">
+                UART2 串口
+              </span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[11px] font-sans font-bold">自然语音合成播报</span>
+              <span className="text-[8px] font-mono text-slate-500 uppercase mt-0.5">STM32H7 ➔ Voice</span>
             </div>
           </button>
         </div>

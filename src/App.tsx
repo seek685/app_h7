@@ -27,7 +27,8 @@ export default function App() {
       lcd: false,
       ultrasonic: false,
       wifi: false,
-      cloud: false
+      cloud: false,
+      voice: false
     }
   });
 
@@ -87,16 +88,19 @@ export default function App() {
     let logMsg = '';
     switch (signalKey) {
       case 'camera':
-        logMsg = `[DCMI 视频总声] [${timestamp}] 收到摄像头输入 DMA 图像更新中断 #244。拷贝 384KB 直驱数据到主控 RAM 帧缓存中。`;
+        logMsg = `[DCMI 视频总线] [${timestamp}] 收到摄像头输入 DMA 图像更新中断 #244。拷贝 384KB 直驱数据到主控 RAM 帧缓存中。`;
         break;
       case 'lcd':
-        logMsg = `[LTDC 显示总线] [${timestamp}] Chrom-ART DMA2D 图形加速器拷贝完成。帧缓冲双存完成乒乓切换(静态闪存区间 swap)。`;
+        logMsg = `[FMC 显示总线] [${timestamp}] FMC 接口 液晶屏屏刷更新完成。帧缓冲双存完成乒乓切换(静态闪存区间 swap)。`;
         break;
       case 'ultrasonic':
         logMsg = `[输入捕获定时器] [${timestamp}] 捕获到测距回响上升沿跳变信号。脉宽持续: 1140us。解算出避障安全红线距离: 19.53 厘米。`;
         break;
       case 'wifi':
-        logMsg = `[SDIO 骨干网络] [${timestamp}] 遥测上行负载封包就绪: { "障碍物距离": 19.53, "识别目标": ["人"] }。调校启动 WiFi 物联网传输链路。`;
+        logMsg = `[SPI2 骨干网络] [${timestamp}] 遥测上行负载信令就绪: { "障碍物距离": 19.53, "识别目标": ["人"] }。启动高速无线通信传输。`;
+        break;
+      case 'voice':
+        logMsg = `[UART2 语音合成] [${timestamp}] 主控串口下发指令报文: [“警告：前方20厘米内检测到障碍物！”]。SYN6288 开始合成输出自然语音。`;
         break;
     }
 
@@ -269,14 +273,14 @@ export default function App() {
               </div>
               
               {/* 总线配色图例指引 */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-1 text-[10px]">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 pt-1 text-[10px]">
                 <div className="flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-pink-500 shadow-[0_0_6px_rgba(236,72,153,0.6)]" />
                   <span>DCMI 高速摄像头视频总线</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-yellow-500 shadow-[0_0_6px_rgba(234,179,8,0.6)]" />
-                  <span>LTDC 24位并行 LCD 控制总线</span>
+                  <span>FMC 24位并行 LCD 控制总线</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-purple-500 shadow-[0_0_6px_rgba(168,85,247,0.6)]" />
@@ -284,7 +288,11 @@ export default function App() {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)]" />
-                  <span>4位并行 SDIO v2.0 无线通信总线</span>
+                  <span>4位并行 SPI2 高速无线传输总线</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shadow-[0_0_6px_rgba(249,115,22,0.6)]" />
+                  <span>UART2 自然语音播报串口控制线</span>
                 </div>
               </div>
             </div>
@@ -330,10 +338,11 @@ export default function App() {
                 {inferenceLogs.map((log, index) => {
                   let color = 'text-slate-400';
                   if (log.includes('[DCMI')) color = 'text-pink-400';
-                  else if (log.includes('[LTDC')) color = 'text-yellow-400';
-                  else if (log.includes('[TIMER')) color = 'text-purple-400';
-                  else if (log.includes('[CLOUD')) color = 'text-orange-400';
-                  else if (log.includes('[SDIO')) color = 'text-emerald-400';
+                  else if (log.includes('[FMC') || log.includes('[LTDC')) color = 'text-yellow-400';
+                  else if (log.includes('[TIMER') || log.includes('[输入捕获')) color = 'text-purple-400';
+                  else if (log.includes('[CLOUD') || log.includes('[云端联动')) color = 'text-orange-400';
+                  else if (log.includes('[SPI2') || log.includes('[SDIO')) color = 'text-emerald-400';
+                  else if (log.includes('[UART2')) color = 'text-amber-500';
                   else if (log.includes('[初始化') || log.includes('[就绪') || log.includes('[恢复')) color = 'text-cyan-400';
                   else if (log.includes('[停止')) color = 'text-red-400';
 

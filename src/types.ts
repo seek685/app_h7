@@ -28,6 +28,7 @@ export interface InteractiveState {
     ultrasonic: boolean;
     wifi: boolean;
     cloud: boolean;
+    voice: boolean;
   };
 }
 

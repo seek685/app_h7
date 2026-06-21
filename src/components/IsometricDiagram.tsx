@@ -360,7 +360,8 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
     source: { x: number; y: number; z: number },
     target: { x: number; y: number; z: number },
     color: string,
-    isPulsing: boolean
+    isPulsing: boolean,
+    pulseColor?: string
   ) => {
     // 标准曼哈顿直角折线路由算法 (X走线 -> 拐角 -> Y走线 -> 垂直高度对齐 Z)
     const p1 = project(source.x, source.y, source.z);
@@ -397,15 +398,15 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           opacity={isPulsing ? 1.0 : 0.4}
           className="transition-all duration-300"
           style={{
-            filter: isPulsing ? 'drop-shadow(0 0 4px ' + color + ')' : 'none'
+            filter: isPulsing ? 'drop-shadow(0 0 5px ' + (pulseColor || color) + ')' : 'none'
           }}
         />
         {/* 数据包无限周期流动虚线特效 */}
         <path
           d={pathD}
           fill="none"
-          stroke={isPulsing ? primaryAccent : color}
-          strokeWidth={1.8}
+          stroke={isPulsing ? (pulseColor || primaryAccent) : color}
+          strokeWidth={isPulsing ? 2.2 : 1.8}
           strokeDasharray={isPulsing ? "8, 16" : "6, 24"}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -523,7 +524,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
         />
 
         {/* 2. 在线路板上渲染曼哈顿总线铜线信号轨迹 */}
-        {/* DCMI: OV5640 摄像头传感器 -> STM32H7 (粉红/霓虹紫配色传输线) */}
+        {/* DCMI trace: OV5640 摄像头传感器 -> STM32H7 (粉红配色传输线) */}
         {renderTrace(
           { x: -210, y: -60, z: 2 },
           { x: -60, y: -20, z: 2 },
@@ -531,7 +532,7 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           state.simulatingSignals.camera || activeModuleId === 'ov5640'
         )}
 
-        {/* LTDC Display Interface: STM32H7 主控 -> TFT 液晶面板 (金黄配色总线) */}
+        {/* FMC 8080 Bus Display Interface: STM32H7 主控 -> TFT 液晶面板 (金黄配色总线) */}
         {renderTrace(
           { x: -20, y: 60, z: 2 },
           { x: -60, y: 210, z: 2 },
@@ -547,12 +548,21 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
           state.simulatingSignals.ultrasonic || activeModuleId === 'ultrasonic'
         )}
 
-        {/* SDIO Bus: ESP-WiFi 模块 -> STM32H7 主控 (翠绿色走线组) */}
+        {/* SPI2 Bus: STM32H7 主控 -> ESP-WiFi 模块 (翠绿色走线组) */}
         {renderTrace(
           { x: 20, y: -210, z: 2 },
           { x: 20, y: -60, z: 2 },
           '#10b981',
           state.simulatingSignals.wifi || activeModuleId === 'wifi'
+        )}
+
+        {/* UART2 trace: STM32H7 → SYN6288 voice module (pink #ec4899 color, amber pulse) */}
+        {renderTrace(
+          { x: 40, y: -40, z: 2 },
+          { x: 114, y: -80, z: 2 },
+          '#ec4899',
+          state.simulatingSignals.voice || activeModuleId === 'voice',
+          '#f97316'
         )}
 
         {/* 射频天线信号：WiFi 模块 -> 远程物联网云 (空间气隙射频链路) */}
@@ -760,6 +770,86 @@ export const IsometricDiagram: React.FC<IsometricDiagramProps> = ({
             </g>
           );
         })}
+
+
+        {/* === SYN6288 语音合成模块 === */}
+        {renderBox(
+          'voice',
+          130, -80, 0,
+          32, 28, 4,
+          '#f97316',
+          activeModuleId === 'voice',
+          activeModuleId === 'voice',
+          { topFill: 'rgba(251, 146, 60, 0.45)', leftFill: 'rgba(194, 65, 12, 0.65)', rightFill: 'rgba(124, 45, 18, 0.85)' }
+        )}
+        {/* 扬声器喇叭细节设计 (Speaker Cone Detail on Top: x=130, y=-80, z=4) */}
+        <g opacity={activeModuleId === 'voice' || state.simulatingSignals.voice ? 1.0 : 0.6} pointerEvents="none">
+          <ellipse
+            cx={project(130, -80, 4.2).x}
+            cy={project(130, -80, 4.2).y}
+            rx={8 * cos30}
+            ry={8 * sin30}
+            fill="rgba(15, 23, 42, 0.9)"
+            stroke="#f97316"
+            strokeWidth={1}
+          />
+          <ellipse
+            cx={project(130, -80, 4.2).x}
+            cy={project(130, -80, 4.2).y}
+            rx={4 * cos30}
+            ry={4 * sin30}
+            fill="rgba(30, 41, 59, 1)"
+            stroke="#fdba74"
+            strokeWidth={0.8}
+          />
+          <line
+            x1={project(124, -80, 4.3).x}
+            y1={project(124, -80, 4.3).y}
+            x2={project(136, -80, 4.3).x}
+            y2={project(136, -80, 4.3).y}
+            stroke="#f97316"
+            strokeWidth={0.5}
+            opacity={0.4}
+          />
+          <line
+            x1={project(130, -84, 4.3).x}
+            y1={project(130, -84, 4.3).y}
+            x2={project(130, -76, 4.3).x}
+            y2={project(130, -76, 4.3).y}
+            stroke="#f97316"
+            strokeWidth={0.5}
+            opacity={0.4}
+          />
+        </g>
+        {/* 语音信号触发时波纹动画 */}
+        {(state.simulatingSignals.voice || activeModuleId === 'voice') && (
+          <g opacity={0.85} className="pointer-events-none">
+            <ellipse
+              cx={project(130, -80, 4.2).x}
+              cy={project(130, -80, 4.2).y}
+              rx={12 * cos30}
+              ry={12 * sin30}
+              fill="none"
+              stroke="#f97316"
+              strokeWidth={1}
+            >
+              <animate attributeName="opacity" values="0;1;0" dur="1s" repeatCount="indefinite" />
+              <animate attributeName="stroke-width" values="1;2.5;0.5" dur="1s" repeatCount="indefinite" />
+            </ellipse>
+            <ellipse
+              cx={project(130, -80, 4.2).x}
+              cy={project(130, -80, 4.2).y}
+              rx={20 * cos30}
+              ry={20 * sin30}
+              fill="none"
+              stroke="#f97316"
+              strokeWidth={0.8}
+              opacity={0.6}
+            >
+              <animate attributeName="opacity" values="0;0.7;0" dur="1s" begin="0.3s" repeatCount="indefinite" />
+            </ellipse>
+          </g>
+        )}
 
 
         {/* === OV5640 摄像头多焦视觉传感器模块 === */}
